@@ -5,8 +5,8 @@ from sko.tools import func_transformer
 
 class APSO:
 
-    def __init__(self, particles, velocities, fitness_function,
-                 w=0.8, c_1=1, c_2=1, max_iter=100, auto_coef=True,
+    def __init__(self, n_dim, particles, velocities, fitness_function,
+                 w=0.8, c_1=2, c_2=2, lb=-1e5, ub=1e5, max_iter=100, auto_coef=True,
                  verbose=False, n_processes=0):
         self.particles = particles
         self.velocities = velocities
@@ -14,6 +14,7 @@ class APSO:
         self.func = func_transformer(fitness_function, n_processes)
         self.progress_bar = tqdm(total=max_iter)
 
+        self.n_dim = n_dim
         self.N = len(self.particles)
         self.D = len(self.particles[0])
         self.w = w
@@ -21,7 +22,12 @@ class APSO:
         self.c_2 = c_2
         self.auto_coef = auto_coef
         self.max_iter = max_iter
-
+        
+        self.lb, self.ub = np.array(lb) * np.ones(self.n_dim), np.array(ub) * np.ones(self.n_dim)
+        assert self.n_dim == len(self.lb) == len(self.ub), 'dim == len(lb) == len(ub) is not True'
+        assert np.all(self.ub > self.lb), 'upper-bound must be greater than lower-bound'
+        self.v_high = self.ub - self.lb
+        self.v_low = -self.v_high
 
         self.p_bests = self.particles
         self.p_bests_values = self.cal_y()
@@ -78,10 +84,10 @@ class APSO:
 
         self.is_running = np.sum(self.velocities - new_velocities) != 0
 
-        # update positions and velocities
-        self.velocities = new_velocities
-        self.particles = self.particles + new_velocities
-
+        # update positions and velocities checking for boundaries
+        self.velocities = np.clip(new_velocities, self.v_low, self.v_high)
+        self.particles += self.velocities
+        self.particles = np.clip(self.particles, self.lb, self.ub)
 
     def update_bests(self):
         fits = self.func(self.particles)
