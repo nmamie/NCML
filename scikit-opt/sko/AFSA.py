@@ -6,6 +6,7 @@
 
 import numpy as np
 from tqdm import tqdm
+from sko.tools import func_transformer
 from scipy import spatial
 
 
@@ -99,9 +100,13 @@ from scipy import spatial
 # %%
 class AFSA:
     def __init__(self, func, n_dim, size_pop=50, max_iter=300,
-                 max_try_num=100, step=0.5, visual=0.3,
-                 q=0.98, delta=0.5):
+                 max_try_num=100, lb=-1e5, ub=1e5, step=0.5, visual=0.3,
+                 q=0.98, delta=0.5, verbose=False, n_processes=0):
         self.func = func
+        self.trans_func = func_transformer(func, n_processes)
+        self.progress_bar = tqdm(total=max_iter)
+        self.verbose=verbose
+        
         self.n_dim = n_dim
         self.size_pop = size_pop
         self.max_iter = max_iter
@@ -110,14 +115,24 @@ class AFSA:
         self.visual = visual  # 鱼的最大感知范围
         self.q = q  # 鱼的感知范围衰减系数
         self.delta = delta  # 拥挤度阈值，越大越容易聚群和追尾
+        
+        self.lb, self.ub = np.array(lb) * np.ones(self.n_dim), np.array(ub) * np.ones(self.n_dim)
+        assert self.n_dim == len(self.lb) == len(self.ub), 'dim == len(lb) == len(ub) is not True'
+        assert np.all(self.ub > self.lb), 'upper-bound must be greater than lower-bound'
 
-        self.X = np.random.rand(self.size_pop, self.n_dim)
-        self.Y = np.array([self.func(x) for x in self.X])
+        self.X = np.random.uniform(low=self.lb, high=self.ub, size=(self.size_pop, self.n_dim))
+        self.Y = self.cal_y()
 
         best_idx = self.Y.argmin()
         self.best_x, self.best_y = self.X[best_idx, :], self.Y[best_idx]
         self.best_X, self.best_Y = self.best_x, self.best_y  # will be deprecated, use lowercase
+        self.best_y_hist = []
 
+    def cal_y(self):
+        # calculate y for every x in X
+        self.Y = self.trans_func(self.X).reshape(-1, 1)
+        return self.Y
+    
     def move_to_target(self, idx_individual, x_target):
         '''
         move to target
@@ -131,10 +146,10 @@ class AFSA:
         x_new = x + self.step * np.random.rand() * (x_target - x)
         # x_new = x_target
         self.X[idx_individual, :] = x_new
-        self.Y[idx_individual] = self.func(x_new)
-        if self.Y[idx_individual] < self.best_Y:
-            self.best_x = self.X[idx_individual, :].copy()
-            self.best_y = self.Y[idx_individual].copy()
+        # self.Y = self.cal_y()
+        # if self.Y[idx_individual] < self.best_Y:
+        #     self.best_x = self.X[idx_individual, :].copy()
+        #     self.best_y = self.Y[idx_individual].copy()
 
     def move(self, idx_individual):
         '''
@@ -146,10 +161,10 @@ class AFSA:
         r = 2 * np.random.rand(self.n_dim) - 1
         x_new = self.X[idx_individual, :] + self.visual * r
         self.X[idx_individual, :] = x_new
-        self.Y[idx_individual] = self.func(x_new)
-        if self.Y[idx_individual] < self.best_Y:
-            self.best_X = self.X[idx_individual, :].copy()
-            self.best_Y = self.Y[idx_individual].copy()
+        # self.Y = self.cal_y()
+        # if self.Y[idx_individual] < self.best_Y:
+        #     self.best_X = self.X[idx_individual, :].copy()
+        #     self.best_Y = self.Y[idx_individual].copy()
 
     def prey(self, idx_individual):
         '''
@@ -204,16 +219,26 @@ class AFSA:
         print("Fish are swarming...")
         self.max_iter = max_iter or self.max_iter
         # progress bar
-        progress_bar = tqdm(range(self.max_iter))
         for epoch in range(self.max_iter):
             for idx_individual in range(self.size_pop):
                 self.swarm(idx_individual)
+                self.X = np.clip(self.X, self.lb, self.ub)
+                self.cal_y()
                 self.follow(idx_individual)
+                self.X = np.clip(self.X, self.lb, self.ub)
+                self.cal_y()
+                # find best individual
+                best_idx = self.Y.argmin()
+                self.best_x = self.X[best_idx, :].copy()
+                self.best_y = self.Y[best_idx].copy()
+            
             self.visual *= self.q
+            self.best_x = np.clip(self.best_x, self.lb, self.ub)
+            self.best_y_hist.append(self.best_y)
             # progress_bar update
-            progress_bar.update(1)
-            progress_bar.set_description(f"Epoch: {epoch+1} | Best fit: {self.best_y} at {self.best_x}")
-            progress_bar.refresh()
+            self.progress_bar.update(1)
+            self.progress_bar.set_description(f"Epoch: {epoch+1} | Best fit: {self.best_y} at {self.best_x}")
+            self.progress_bar.refresh()
 
         self.best_X, self.best_Y = self.best_x, self.best_y  # will be deprecated, use lowercase
         return self.best_x, self.best_y
