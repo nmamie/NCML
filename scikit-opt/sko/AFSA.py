@@ -229,8 +229,9 @@ class AFSA:
                 self.cal_y()
                 # find best individual
                 best_idx = self.Y.argmin()
-                self.best_x = self.X[best_idx, :].copy()
-                self.best_y = self.Y[best_idx].copy()
+                if self.Y[best_idx] < self.best_y:
+                    self.best_x = self.X[best_idx, :].copy()
+                    self.best_y = self.Y[best_idx].copy()
             
             self.visual *= self.q
             self.best_x = np.clip(self.best_x, self.lb, self.ub)
