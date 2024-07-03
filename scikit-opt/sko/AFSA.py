@@ -125,8 +125,9 @@ class AFSA:
 
         best_idx = self.Y.argmin()
         self.best_x, self.best_y = self.X[best_idx, :], self.Y[best_idx]
-        self.best_X, self.best_Y = self.best_x, self.best_y  # will be deprecated, use lowercase
+        self.best_X, self.best_Y = self.X.copy(), np.array([[np.inf]] * self.size_pop)
         self.best_y_hist = []
+        self.best_y_avg_hist = []
 
     def cal_y(self):
         # calculate y for every x in X
@@ -223,23 +224,27 @@ class AFSA:
             for idx_individual in range(self.size_pop):
                 self.swarm(idx_individual)
                 self.X = np.clip(self.X, self.lb, self.ub)
-                self.cal_y()
+                self.Y = self.cal_y()
                 self.follow(idx_individual)
                 self.X = np.clip(self.X, self.lb, self.ub)
-                self.cal_y()
+                self.Y = self.cal_y()
                 # find best individual
                 best_idx = self.Y.argmin()
                 if self.Y[best_idx] < self.best_y:
                     self.best_x = self.X[best_idx, :].copy()
                     self.best_y = self.Y[best_idx].copy()
+                # for every individual find best position and fitness
+                if self.Y[idx_individual] < self.best_Y[idx_individual]:
+                    self.best_X[idx_individual, :] = self.X[idx_individual, :].copy()
+                    self.best_Y[idx_individual] = self.Y[idx_individual].copy()
             
             self.visual *= self.q
             self.best_x = np.clip(self.best_x, self.lb, self.ub)
             self.best_y_hist.append(self.best_y)
+            self.best_y_avg_hist.append(np.average(self.best_Y))
             # progress_bar update
             self.progress_bar.update(1)
-            self.progress_bar.set_description(f"Epoch: {epoch+1} | Best fit: {self.best_y} at {self.best_x}")
+            self.progress_bar.set_description(f"Epoch: {epoch+1} | Best fit: {self.best_y} at {self.best_x} | Average fit: {np.average(self.best_Y)}")
             self.progress_bar.refresh()
 
-        self.best_X, self.best_Y = self.best_x, self.best_y  # will be deprecated, use lowercase
         return self.best_x, self.best_y
