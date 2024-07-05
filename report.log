@@ -59,3 +59,15 @@
 2024-07-03 15:04:38,039 - pyswarms.discrete.binary - INFO - Optimization finished | best cost: -0.8387096774193549, best pos: [1 1 0 ... 0 1 1]
 2024-07-03 15:08:18,381 - pyswarms.discrete.binary - INFO - Optimize for 30 iters with {'c1': 0.4, 'c2': 0.4, 'w': 0.8, 'k': 30, 'p': 2}
 2024-07-03 15:09:58,049 - pyswarms.discrete.binary - INFO - Optimization finished | best cost: -0.8387096774193549, best pos: [0 0 1 ... 0 1 1]
+2024-07-04 09:46:36,961 - pyswarms.discrete.binary - INFO - Optimize for 30 iters with {'c1': 0.4, 'c2': 0.4, 'w': 0.8, 'k': 30, 'p': 2}
+2024-07-04 09:48:04,479 - pyswarms.discrete.binary - INFO - Optimization finished | best cost: -0.8387096774193549, best pos: [1 1 0 ... 1 0 1]
+2024-07-04 09:51:29,241 - pyswarms.discrete.binary - INFO - Optimize for 30 iters with {'c1': 0.4, 'c2': 0.4, 'w': 0.8, 'k': 30, 'p': 2}
+2024-07-04 09:51:42,714 - pyswarms.discrete.binary - INFO - Optimize for 30 iters with {'c1': 0.4, 'c2': 0.4, 'w': 0.8, 'k': 30, 'p': 2}
+2024-07-04 09:52:16,792 - pyswarms.discrete.binary - INFO - Optimize for 30 iters with {'c1': 0.4, 'c2': 0.4, 'w': 0.8, 'k': 30, 'p': 2}
+2024-07-04 09:53:29,737 - pyswarms.discrete.binary - INFO - Optimization finished | best cost: -0.8387096774193549, best pos: [1 1 1 ... 0 1 1]
+2024-07-04 13:22:14,132 - pyswarms.discrete.binary - INFO - Optimize for 30 iters with {'c1': 0.4, 'c2': 0.4, 'w': 0.8, 'k': 30, 'p': 2}
+2024-07-04 13:24:04,145 - pyswarms.discrete.binary - INFO - Optimization finished | best cost: -0.9615384615384616, best pos: [0 0 0 ... 1 1 0]
+2024-07-05 11:33:08,227 - pyswarms.discrete.binary - INFO - Optimize for 30 iters with {'c1': 0.4, 'c2': 0.4, 'w': 0.8, 'k': 30, 'p': 2}
+2024-07-05 11:34:55,323 - pyswarms.discrete.binary - INFO - Optimization finished | best cost: -0.8387096774193549, best pos: [0 0 0 ... 1 0 1]
+2024-07-05 11:40:36,909 - pyswarms.discrete.binary - INFO - Optimize for 30 iters with {'c1': 0.4, 'c2': 0.4, 'w': 0.8, 'k': 30, 'p': 2}
+2024-07-05 11:42:08,205 - pyswarms.discrete.binary - INFO - Optimization finished | best cost: -0.9615384615384616, best pos: [0 1 0 ... 0 1 0]
