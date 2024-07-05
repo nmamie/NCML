@@ -111,7 +111,8 @@ class PSO(SkoBase):
         self.Y = self.cal_y()  # y = f(x) for all particles
         self.pbest_x = self.X.copy()  # personal best location of every particle in history
         self.pbest_y = np.array([[np.inf]] * pop)  # best image of every particle in history
-        self.p_best_y_hist = [] # gbest_y average for every individial in every iteration
+        self.p_best_y_hist = [] # pbest_y average for every individial in every iteration
+        self.p_best_y_std_hist = [] # pbest_y std for every individial in every iteration
         self.gbest_x = self.pbest_x.mean(axis=0).reshape(1, -1)  # global best location for all particles
         self.gbest_y = np.inf  # global best y for all particles
         self.gbest_y_hist = []  # gbest_y of every iteration
@@ -211,6 +212,7 @@ class PSO(SkoBase):
 
             self.gbest_y_hist.append(self.gbest_y)
             self.p_best_y_hist.append(np.average(self.pbest_y))
+            self.p_best_y_std_hist.append(np.std(self.pbest_y))
         self.best_x, self.best_y = self.gbest_x, self.gbest_y
         return self.best_x, self.best_y
 
